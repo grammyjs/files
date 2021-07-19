@@ -1,27 +1,25 @@
-import {
-    File,
-    Context,
-    Api,
-    RawApi,
-    Middleware,
-    Transformer,
-} from './deps.deno.ts'
+import { File, Context, Api, RawApi, Transformer } from './deps.deno.ts'
 import { FileX, installFileMethods } from './files.ts'
 
-export type FileFlavor<C extends Context> = Omit<C, 'api' | 'getFile'> & {
-    api: FileApiFlavor<C['api']>
-    getFile: () => ReturnType<C['getFile']> & Promise<FileX>
-}
-export type FileApiFlavor<A extends Api> = Omit<A, 'raw' | 'getFile'> & {
-    raw: FileRawApiFlavor<A['raw']>
-    getFile: (
-        ...args: Parameters<A['getFile']>
-    ) => ReturnType<A['getFile']> & Promise<FileX>
-}
-type FileRawApiFlavor<R extends RawApi> = Omit<R, 'getFile'> & {
-    getFile: (
-        ...args: Parameters<RawApi['getFile']>
-    ) => ReturnType<R['getFile']> & Promise<FileX>
+/**
+ * Transformative API Flavor that adds file handling utilities to the supplied
+ * context object. Check out the
+ * [documentation](https://grammy.dev/guide/context.html#transformative-context-flavours)
+ * about this kind of context flavor.
+ */
+export type FileFlavor<C extends Context> = ContextX<C> & C
+export type FileApiFlavor<A extends Api> = ApiX<A> & A
+
+/**
+ * Mapping table from method names to API call result extensions.
+ *
+ * In other words, every key K of this interface identifies a method of the Bot
+ * API that exists as method on `ctx`, `ctx.api`, and `ctx.api.raw`. The return
+ * type of every one of these three methods will be augmented by `X[K]` via type
+ * intersection.
+ */
+interface X {
+    getFile: FileX
 }
 
 export interface FilesPluginOptions {
@@ -43,28 +41,15 @@ export interface FilesPluginOptions {
     buildFileUrl?: (root: string, token: string, path: string) => string
 }
 
-const DEFAULT_OPTIONS: Required<FilesPluginOptions> = {
-    apiRoot: 'https://api.telegram.org',
-    buildFileUrl: (root, token, path) => `${root}/file/bot${token}/${path}`,
-}
-
-export function hydrate<C extends Context>(
+export function hydrateFiles<R extends RawApi = RawApi>(
     token: string,
     options?: FilesPluginOptions
-): Middleware<FileFlavor<C>> {
-    const hydrator = hydrateApi(token, { ...DEFAULT_OPTIONS, ...options })
-    return (ctx, next) => {
-        ctx.api.config.use(hydrator)
-        return next()
-    }
-}
-
-export function hydrateApi<R extends RawApi = RawApi>(
-    token: string,
-    options: Required<FilesPluginOptions>
 ): Transformer<R> {
-    const buildLink = (path: string) =>
-        options.buildFileUrl(options.apiRoot, token, path)
+    const root = options?.apiRoot ?? 'https://api.telegram.org'
+    const buildFileUrl =
+        options?.buildFileUrl ??
+        ((root, token, path) => `${root}/file/bot${token}/${path}`)
+    const buildLink = (path: string) => buildFileUrl(root, token, path)
     const t: Transformer = async (prev, method, payload) => {
         const res = await prev(method, payload)
         if (res.ok && isFile(res.result))
@@ -77,3 +62,20 @@ export function hydrateApi<R extends RawApi = RawApi>(
 function isFile(val: unknown): val is File {
     return typeof val === 'object' && val !== null && 'file_id' in val
 }
+
+// Helper types to add `X` to `Context` and `Api` and `RawApi`
+type ContextX<C extends Context> = AddX<C> & {
+    api: ApiX<C['api']>
+}
+type ApiX<A extends Api> = AddX<A> & {
+    raw: RawApiX<A['raw']>
+}
+type RawApiX<R extends RawApi> = AddX<R>
+
+type AddX<Q extends Record<keyof X, (...args: any[]) => any>> = {
+    [K in keyof X]: Extend<Q[K], X[K]>
+}
+type Extend<F extends (...args: any[]) => any, X> = (
+    ...args: Parameters<F>
+) => Promise<Await<ReturnType<F>> & X>
+type Await<T> = T extends PromiseLike<infer V> ? Await<V> : T
