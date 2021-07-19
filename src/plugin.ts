@@ -22,6 +22,11 @@ interface X {
     getFile: FileX
 }
 
+/**
+ * Options to pass to the files plugin. They are mainly useful if you are
+ * working with a local Bot API server, and you need to adjust from where to
+ * download files.
+ */
 export interface FilesPluginOptions {
     /**
      * Root URL of the Telegram Bot API server. Used when downloading files.
@@ -41,6 +46,24 @@ export interface FilesPluginOptions {
     buildFileUrl?: (root: string, token: string, path: string) => string
 }
 
+/**
+ * Plugin that hydrates results to `getFile`, and equips the results with
+ * methods to download files, or get their URL/path.
+ *
+ * This plugin is an [API transformer
+ * function](https://grammy.dev/advanced/transformers.html) that can be
+ * installed on `bot.api`.
+ *
+ * ```ts
+ * bot.api.config.use(hydrateFiles(bot.token))
+ * ```
+ *
+ * Check out [the official plugin
+ * documentation](https://grammy.dev/plugins/files.html) on the grammY webiste.
+ *
+ * @param token bot token, use `bot.token`
+ * @param options optional configuration
+ */
 export function hydrateFiles<R extends RawApi = RawApi>(
     token: string,
     options?: FilesPluginOptions
