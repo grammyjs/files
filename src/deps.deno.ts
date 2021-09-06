@@ -1,17 +1,17 @@
 import {
     readerFromIterable,
     copy,
-} from 'https://deno.land/std@0.104.0/io/mod.ts'
+} from 'https://deno.land/std@0.105.0/io/mod.ts'
 
-export { Api, Context } from 'https://deno.land/x/grammy@v1.3.0/mod.ts'
+export { Api, Context } from 'https://lib.deno.dev/x/grammy@v1/mod.ts'
 export type {
     Transformer,
     RawApi,
-} from 'https://deno.land/x/grammy@v1.3.0/mod.ts'
-export type { File } from 'https://cdn.skypack.dev/@grammyjs/types@v2.2.6?dts'
+} from 'https://lib.deno.dev/x/grammy@v1/mod.ts'
+export type { File } from 'https://cdn.skypack.dev/@grammyjs/types@v2?dts'
 
 // Determine whether a file path is absolute
-export { isAbsolute as isAbsolutePath } from 'https://deno.land/std@0.104.0/path/mod.ts'
+export { isAbsolute as isAbsolutePath } from 'https://deno.land/std@0.105.0/path/mod.ts'
 // Create a temporary file
 export const createTempFile = () => Deno.makeTempFile()
 // Copy a local file to a file path
