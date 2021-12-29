@@ -1,10 +1,10 @@
 import {
+    copyFile,
     createTempFile,
     downloadFile,
     File,
     isAbsolutePath,
-    copyFile,
-} from './deps.deno.ts'
+} from "./deps.deno.ts";
 
 export interface FileX {
     /** Computes a URL from the `file_path` property of this file object. The
@@ -19,7 +19,7 @@ export interface FileX {
      * Note that this method is installed by grammY on [the File
      * object](https://core.telegram.org/bots/api#file).
      */
-    getUrl(): string
+    getUrl(): string;
     /**
      * This method will download the file from the Telegram servers and store it
      * under the given file path on your system. It returns the absolute path to
@@ -42,29 +42,29 @@ export interface FileX {
      * @param path Optional path to store the file (default: temporary file)
      * @returns An absolute file path to the downloaded/copied file
      */
-    download(path?: string): Promise<string>
+    download(path?: string): Promise<string>;
 }
 
 export function installFileMethods(
     file: File,
-    linkBuilder: (path: string) => string
+    linkBuilder: (path: string) => string,
 ) {
     const methods: FileX = {
         getUrl: () => {
-            const path = file.file_path
+            const path = file.file_path;
             if (path === undefined) {
-                const id = file.file_id
-                throw new Error(`File path is not available for file '${id}'`)
+                const id = file.file_id;
+                throw new Error(`File path is not available for file '${id}'`);
             }
-            return isAbsolutePath(path) ? path : linkBuilder(path)
+            return isAbsolutePath(path) ? path : linkBuilder(path);
         },
         download: async (path?: string) => {
-            const url = methods.getUrl()
-            if (path === undefined) path = await createTempFile()
-            if (isAbsolutePath(url)) await copyFile(url, path)
-            else await downloadFile(url, path)
-            return path
+            const url = methods.getUrl();
+            if (path === undefined) path = await createTempFile();
+            if (isAbsolutePath(url)) await copyFile(url, path);
+            else await downloadFile(url, path);
+            return path;
         },
-    }
-    Object.assign(file, methods)
+    };
+    Object.assign(file, methods);
 }

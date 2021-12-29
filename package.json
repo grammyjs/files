@@ -16,7 +16,10 @@
         "url": "https://github.com/grammyjs/files/issues"
     },
     "scripts": {
-        "build": "deno2node tsconfig.json"
+        "build": "deno2node tsconfig.json",
+        "cache": "deno cache src/mod.ts",
+        "lint": "deno lint --config deno.json",
+        "fmt": "deno fmt --config deno.json"
     },
     "peerDependencies": {
         "grammy": "^1.3.0"
