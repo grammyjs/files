@@ -11,7 +11,7 @@ export interface FileX {
      * URL can be used to download the file contents.
      *
      * If you are using a local Bot API server, then this method will return the
-     * file path identifies the local file on your system.
+     * file path that identifies the local file on your system.
      *
      * If the `file_path` of this file object is `undefined`, this method will
      * throw an error.
