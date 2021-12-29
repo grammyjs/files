@@ -73,8 +73,8 @@ export function hydrateFiles<R extends RawApi = RawApi>(
     const buildFileUrl = options?.buildFileUrl ??
         ((root, token, path) => `${root}/file/bot${token}/${path}`);
     const buildLink = (path: string) => buildFileUrl(root, token, path);
-    const t: Transformer = async (prev, method, payload) => {
-        const res = await prev(method, payload);
+    const t: Transformer = async (prev, method, payload, signal) => {
+        const res = await prev(method, payload, signal);
         if (res.ok && isFile(res.result)) {
             installFileMethods(res.result, buildLink);
         }
