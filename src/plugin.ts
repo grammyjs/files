@@ -60,7 +60,7 @@ export interface FilesPluginOptions {
  * ```
  *
  * Check out [the official plugin
- * documentation](https://grammy.dev/plugins/files.html) on the grammY webiste.
+ * documentation](https://grammy.dev/plugins/files.html) on the grammY website.
  *
  * @param token bot token, use `bot.token`
  * @param options optional configuration
