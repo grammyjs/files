@@ -47,7 +47,7 @@ export interface FileX {
 
 export function installFileMethods(
     file: File,
-    linkBuilder: (path: string) => string,
+    linkBuilder: (path: string) => string | URL,
 ) {
     const methods: FileX = {
         getUrl: () => {
@@ -56,7 +56,10 @@ export function installFileMethods(
                 const id = file.file_id;
                 throw new Error(`File path is not available for file '${id}'`);
             }
-            return isAbsolutePath(path) ? path : linkBuilder(path);
+            if (isAbsolutePath(path)) return path;
+            const link = linkBuilder(path);
+            if (link instanceof URL) return link.href;
+            return link;
         },
         download: async (path?: string) => {
             const url = methods.getUrl();
