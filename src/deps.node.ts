@@ -3,8 +3,8 @@ import * as fs from "fs";
 import * as os from "os";
 import * as https from "https";
 
-export { Api, Context, RawApi, Transformer } from "grammy";
-export { File } from "@grammyjs/types";
+export { Api, Context, type RawApi, type Transformer } from "grammy";
+export { type File } from "grammy/types";
 
 // Determine whether a file path is absolute
 export { isAbsolute as isAbsolutePath } from "path";

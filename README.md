@@ -6,8 +6,8 @@ Check out [the official plugin page](https://grammy.dev/plugins/files.html) for 
 ## Example
 
 ```ts
-import { Bot, Context } from "grammy";
-import { FileFlavor, hydrateFiles } from "@grammyjs/files";
+import { Bot, type Context } from "grammy";
+import { type FileFlavor, hydrateFiles } from "@grammyjs/files";
 
 // Transformative API flavor
 type MyContext = FileFlavor<Context>;

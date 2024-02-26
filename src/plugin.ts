@@ -36,15 +36,34 @@ export interface FilesPluginOptions {
      */
     apiRoot?: string;
     /**
+     * Specifies whether to use the [test
+     * environment](https://core.telegram.org/bots/webapps#using-bots-in-the-test-environment).
+     * Can be either `"prod"` (default) or `"test"`.
+     *
+     * The testing infrastructure is separate from the regular production
+     * infrastructure. No chats, accounts, or other data is shared between them.
+     * If you set this option to `"test"`, you will need to make your Telegram
+     * client connect to the testing data centers of Telegram, register your
+     * phone number again, open a new chat with @BotFather, and create a
+     * separate bot.
+     */
+    environment?: "prod" | "test";
+    /**
      * URL builder function for downloading files. Can be used to modify which
      * API server should be called when downloading files.
      *
      * @param root The URL that was passed in `apiRoot`, or its default value
      * @param token The bot's token that was passed when installing the plugin
      * @param path The `file_path` value that identifies the file
+     * @param env The value that was passed in `environment`, or its default value
      * @returns The URL that will be fetched during the download
      */
-    buildFileUrl?: (root: string, token: string, path: string) => string;
+    buildFileUrl?: (
+        root: string,
+        token: string,
+        method: string,
+        env: "prod" | "test",
+    ) => string | URL;
 }
 
 /**
@@ -70,9 +89,11 @@ export function hydrateFiles<R extends RawApi = RawApi>(
     options?: FilesPluginOptions,
 ): Transformer<R> {
     const root = options?.apiRoot ?? "https://api.telegram.org";
+    const environment = options?.environment ?? "prod";
     const buildFileUrl = options?.buildFileUrl ??
         ((root, token, path) => `${root}/file/bot${token}/${path}`);
-    const buildLink = (path: string) => buildFileUrl(root, token, path);
+    const buildLink = (path: string) =>
+        buildFileUrl(root, token, path, environment);
     const t: Transformer = async (prev, method, payload, signal) => {
         const res = await prev(method, payload, signal);
         if (res.ok && isFile(res.result)) {

@@ -1,0 +1,12 @@
+{
+    "lock": false,
+    "exclude": [
+        "./node_modules/",
+        "./out/",
+        "./package-lock.json"
+    ],
+    "fmt": {
+        "indentWidth": 4,
+        "proseWrap": "preserve"
+    }
+}
