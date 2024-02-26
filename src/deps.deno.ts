@@ -1,14 +1,10 @@
-import {
-    copy,
-    readerFromIterable,
-} from "https://deno.land/std@0.135.0/io/mod.ts";
-
-export { Api, Context } from "https://lib.deno.dev/x/grammy@v1/mod.ts";
-export type {
-    RawApi,
-    Transformer,
+export {
+    Api,
+    Context,
+    type RawApi,
+    type Transformer,
 } from "https://lib.deno.dev/x/grammy@v1/mod.ts";
-export type { File } from "https://esm.sh/@grammyjs/types@v2";
+export type { File } from "https://lib.deno.dev/x/grammy@v1/types.ts";
 
 // Determine whether a file path is absolute
 export { isAbsolute as isAbsolutePath } from "https://deno.land/std@0.135.0/path/mod.ts";
@@ -18,11 +14,6 @@ export const { makeTempFile: createTempFile, copyFile } = Deno;
 export async function downloadFile(url: string, dest: string) {
     const { body } = await fetch(url);
     if (body === null) throw new Error("Download failed, no response body!");
-    const reader = readerFromIterable(body);
-    const writer = await Deno.open(dest, { createNew: true, write: true });
-    try {
-        await copy(reader, writer);
-    } finally {
-        writer.close();
-    }
+    using writer = await Deno.open(dest, { createNew: true, write: true });
+    await body.pipeTo(writer.writable);
 }
