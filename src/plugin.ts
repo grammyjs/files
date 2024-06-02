@@ -90,8 +90,7 @@ export function hydrateFiles<R extends RawApi = RawApi>(
 ): Transformer<R> {
     const root = options?.apiRoot ?? "https://api.telegram.org";
     const environment = options?.environment ?? "prod";
-    const buildFileUrl = options?.buildFileUrl ??
-        ((root, token, path) => `${root}/file/bot${token}/${path}`);
+    const buildFileUrl = options?.buildFileUrl ?? defaultBuildFileUrl;
     const buildLink = (path: string) =>
         buildFileUrl(root, token, path, environment);
     const t: Transformer = async (prev, method, payload, signal) => {
@@ -103,6 +102,16 @@ export function hydrateFiles<R extends RawApi = RawApi>(
     };
     return t;
 }
+
+const defaultBuildFileUrl: NonNullable<FilesPluginOptions["buildFileUrl"]> = (
+    root,
+    token,
+    method,
+    env,
+) => {
+    const prefix = env === "test" ? "test/" : "";
+    return `${root}/file/bot${token}/${prefix}${method}`;
+};
 
 function isFile(val: unknown): val is File {
     return typeof val === "object" && val !== null && "file_id" in val;
