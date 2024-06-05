@@ -1,7 +1,7 @@
 {
     "name": "@grammyjs/files",
     "description": "Files plugin for grammY",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "author": "KnorpelSenf",
     "license": "MIT",
     "engines": {
