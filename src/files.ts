@@ -2,9 +2,10 @@ import {
     copyFile,
     createTempFile,
     downloadFile,
+    fetchFile,
     File,
     isAbsolutePath,
-    streamFile,
+    readFile,
 } from "./deps.deno.ts";
 
 export interface FileX {
@@ -56,18 +57,16 @@ export interface FileX {
      *  bot.on([":video", ":animation"], async (ctx) => {
      *      // Prepare file for download
      *      const file = await ctx.getFile();
-     *      // Start streaming file
-     *      const data = file.stream();
      *      // Print the size of each chunk
-     *      for await (const chunk of data) {
+     *      for await (const chunk of file) {
      *        console.log(`Read ${chunk.length} bytes`);
      *      }
      *  });
      * ```
      *
-     * @returns An iterator for the received data
+     * @returns Async iterator for the received data
      */
-    getIterator(): AsyncGenerator<Uint8Array>;
+    [Symbol.asyncIterator](): AsyncIterator<Uint8Array>;
 }
 
 export function installFileMethods(
@@ -93,9 +92,13 @@ export function installFileMethods(
             else await downloadFile(url, path);
             return path;
         },
-        getIterator() {
-            const url = this.getUrl();
-            return streamFile(url);
+        async *[Symbol.asyncIterator]() {
+            const url = methods.getUrl();
+            if (isAbsolutePath(url)) {
+                yield* readFile(url);
+            } else {
+                yield* await fetchFile(url);
+            }
         },
     };
     Object.assign(file, methods);

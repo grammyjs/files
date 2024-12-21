@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { IncomingMessage } from "http";
+import type { IncomingMessage } from "http";
 import * as https from "https";
 import * as os from "os";
 import * as path from "path";
@@ -21,7 +21,7 @@ export const createTempFile = async () =>
 export const copyFile = fs.promises.copyFile;
 
 // Streams the repsonse body of a URL
-export async function* streamFile(url: string) {
+export async function* fetchFile(url: string) {
     const response = await new Promise<IncomingMessage>(
         (resolve, reject) => {
             https
@@ -33,6 +33,9 @@ export async function* streamFile(url: string) {
     for await (const chunk of response) {
         yield new Uint8Array(chunk);
     }
+}
+export function readFile(path: string): AsyncIterable<Uint8Array> {
+    return fs.createReadStream(path);
 }
 // Copy a file from a URL to a file path
 export function downloadFile(url: string, dest: string) {
