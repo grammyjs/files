@@ -2,8 +2,10 @@ import {
     copyFile,
     createTempFile,
     downloadFile,
+    fetchFile,
     File,
     isAbsolutePath,
+    readFile,
 } from "./deps.deno.ts";
 
 export interface FileX {
@@ -43,6 +45,28 @@ export interface FileX {
      * @returns An absolute file path to the downloaded/copied file
      */
     download(path?: string): Promise<string>;
+    /**
+     * This method will fetch the file URL and return an async iterator which
+     * yields every time a new chunk of data is read.
+     *
+     * If the `file_path` of this file object is `undefined`, this method will
+     * throw an error.
+     *
+     * @example
+     * ```ts
+     *  bot.on([":video", ":animation"], async (ctx) => {
+     *      // Prepare file for download
+     *      const file = await ctx.getFile();
+     *      // Print the size of each chunk
+     *      for await (const chunk of file) {
+     *        console.log(`Read ${chunk.length} bytes`);
+     *      }
+     *  });
+     * ```
+     *
+     * @returns Async iterator for the received data
+     */
+    [Symbol.asyncIterator](): AsyncIterator<Uint8Array>;
 }
 
 export function installFileMethods(
@@ -67,6 +91,14 @@ export function installFileMethods(
             if (isAbsolutePath(url)) await copyFile(url, path);
             else await downloadFile(url, path);
             return path;
+        },
+        async *[Symbol.asyncIterator]() {
+            const url = methods.getUrl();
+            if (isAbsolutePath(url)) {
+                yield* readFile(url);
+            } else {
+                yield* await fetchFile(url);
+            }
         },
     };
     Object.assign(file, methods);
