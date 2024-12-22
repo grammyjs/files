@@ -21,7 +21,7 @@ export const createTempFile = async () =>
 export const copyFile = fs.promises.copyFile;
 
 // Streams the repsonse body of a URL
-export async function* fetchFile(url: string) {
+export async function* fetchFile(url: URL) {
     const response = await new Promise<IncomingMessage>(
         (resolve, reject) => {
             https
@@ -34,11 +34,12 @@ export async function* fetchFile(url: string) {
         yield new Uint8Array(chunk);
     }
 }
-export function readFile(path: string): AsyncIterable<Uint8Array> {
+export function readFile(path: URL): AsyncIterable<Uint8Array> {
     return fs.createReadStream(path);
 }
 // Copy a file from a URL to a file path
-export function downloadFile(url: string, dest: string) {
+export function downloadFile(url: URL, dest: string) {
+    if (url.protocol === "file") return copyFile(url.pathname, dest);
     const file = fs.createWriteStream(dest);
     return new Promise<void>((resolve, reject) => {
         https.get(url, (res) => {

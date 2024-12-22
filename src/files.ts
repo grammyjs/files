@@ -1,5 +1,5 @@
+import { pathToFileURL } from "node:url";
 import {
-    copyFile,
     createTempFile,
     downloadFile,
     fetchFile,
@@ -22,6 +22,7 @@ export interface FileX {
      * object](https://core.telegram.org/bots/api#file).
      */
     getUrl(): string;
+    getUrlObject(): URL;
     /**
      * This method will download the file from the Telegram servers and store it
      * under the given file path on your system. It returns the absolute path to
@@ -69,37 +70,39 @@ export interface FileX {
     [Symbol.asyncIterator](): AsyncIterator<Uint8Array>;
 }
 
-export function installFileMethods(
-    file: File,
+export function getFileMethods(
     linkBuilder: (path: string) => string | URL,
 ) {
     const methods: FileX = {
-        getUrl: () => {
-            const path = file.file_path;
+        getUrl() {
+            const url = this.getUrlObject();
+            return url.protocol === "file" ? url.pathname : url.href;
+        },
+        getUrlObject(this: File) {
+            const path = this.file_path;
             if (path === undefined) {
-                const id = file.file_id;
+                const id = this.file_id;
                 throw new Error(`File path is not available for file '${id}'`);
             }
-            if (isAbsolutePath(path)) return path;
+            if (isAbsolutePath(path)) return pathToFileURL(path);
             const link = linkBuilder(path);
-            if (link instanceof URL) return link.href;
-            return link;
+            return new URL(link);
         },
-        download: async (path?: string) => {
-            const url = methods.getUrl();
+        async download(path?: string) {
+            const url = this.getUrlObject();
             if (path === undefined) path = await createTempFile();
-            if (isAbsolutePath(url)) await copyFile(url, path);
-            else await downloadFile(url, path);
+            await downloadFile(url, path);
             return path;
         },
         async *[Symbol.asyncIterator]() {
-            const url = methods.getUrl();
-            if (isAbsolutePath(url)) {
+            const url = this.getUrlObject();
+            // https://github.com/nodejs/undici/issues/2751
+            if (url.protocol === "file") {
                 yield* readFile(url);
             } else {
                 yield* await fetchFile(url);
             }
         },
     };
-    Object.assign(file, methods);
+    return methods;
 }

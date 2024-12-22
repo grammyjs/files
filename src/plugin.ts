@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Api, Context, File, RawApi, Transformer } from "./deps.deno.ts";
-import { FileX, installFileMethods } from "./files.ts";
+import { FileX, getFileMethods } from "./files.ts";
 
 /**
  * Transformative API Flavor that adds file handling utilities to the supplied
@@ -93,10 +93,11 @@ export function hydrateFiles<R extends RawApi = RawApi>(
     const buildFileUrl = options?.buildFileUrl ?? defaultBuildFileUrl;
     const buildLink = (path: string) =>
         buildFileUrl(root, token, path, environment);
+    const methods = getFileMethods(buildLink);
     const t: Transformer = async (prev, method, payload, signal) => {
         const res = await prev(method, payload, signal);
         if (res.ok && isFile(res.result)) {
-            installFileMethods(res.result, buildLink);
+            Object.assign(res.result, methods);
         }
         return res;
     };
