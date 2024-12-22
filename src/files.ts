@@ -69,15 +69,14 @@ export interface FileX {
     [Symbol.asyncIterator](): AsyncIterator<Uint8Array>;
 }
 
-export function installFileMethods(
-    file: File,
+export function getFileMethods(
     linkBuilder: (path: string) => string | URL,
 ) {
     const methods: FileX = {
-        getUrl: () => {
-            const path = file.file_path;
+        getUrl(this: File) {
+            const path = this.file_path;
             if (path === undefined) {
-                const id = file.file_id;
+                const id = this.file_id;
                 throw new Error(`File path is not available for file '${id}'`);
             }
             if (isAbsolutePath(path)) return path;
@@ -85,15 +84,15 @@ export function installFileMethods(
             if (link instanceof URL) return link.href;
             return link;
         },
-        download: async (path?: string) => {
-            const url = methods.getUrl();
-            if (path === undefined) path = await createTempFile();
+        async download(path?: string) {
+            const url = this.getUrl();
+            path ??= await createTempFile();
             if (isAbsolutePath(url)) await copyFile(url, path);
             else await downloadFile(url, path);
             return path;
         },
         async *[Symbol.asyncIterator]() {
-            const url = methods.getUrl();
+            const url = this.getUrl();
             if (isAbsolutePath(url)) {
                 yield* readFile(url);
             } else {
@@ -101,5 +100,5 @@ export function installFileMethods(
             }
         },
     };
-    Object.assign(file, methods);
+    return methods;
 }
