@@ -61,7 +61,7 @@ export interface FilesPluginOptions {
     buildFileUrl?: (
         root: string,
         token: string,
-        method: string,
+        path: string,
         env: "prod" | "test",
     ) => string | URL;
 }
