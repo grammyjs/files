@@ -61,7 +61,7 @@ export interface FilesPluginOptions {
     buildFileUrl?: (
         root: string,
         token: string,
-        method: string,
+        path: string,
         env: "prod" | "test",
     ) => string | URL;
 }
@@ -107,11 +107,11 @@ export function hydrateFiles<R extends RawApi = RawApi>(
 const defaultBuildFileUrl: NonNullable<FilesPluginOptions["buildFileUrl"]> = (
     root,
     token,
-    method,
+    path,
     env,
 ) => {
     const prefix = env === "test" ? "test/" : "";
-    return `${root}/file/bot${token}/${prefix}${method}`;
+    return `${root}/file/bot${token}/${prefix}${path}`;
 };
 
 function isFile(val: unknown): val is File {
