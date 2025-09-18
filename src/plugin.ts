@@ -118,7 +118,9 @@ export function hydrateFiles<R extends RawApi = RawApi>(
 
     const buildFilePath = options?.buildFilePath ?? undefined;
     const buildPath = (path: string) =>
-        buildFilePath ? buildFilePath(root, token, path, environment) : path;
+        buildFilePath !== undefined
+            ? buildFilePath(root, token, path, environment)
+            : path;
 
     const methods = getFileMethods(buildLink, buildPath);
     const t: Transformer = async (prev, method, payload, signal) => {
