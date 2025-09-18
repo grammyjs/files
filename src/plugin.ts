@@ -69,10 +69,10 @@ export interface FilesPluginOptions {
      * absolute file path instead of a URL. This is useful when you are
      * running a Bot API server, and you want to download files
      * from a custom remote location instead of a local file system.
-     * 
+     *
      * The function can still pass a URL, and the plugin will download the
      * file instead of reading it from the file system.
-     * 
+     *
      * @param root The URL that was passed in `apiRoot`, or its default value
      * @param token The bot's token that was passed when installing the plugin
      * @param path The `file_path` value that identifies the file
@@ -118,9 +118,7 @@ export function hydrateFiles<R extends RawApi = RawApi>(
 
     const buildFilePath = options?.buildFilePath ?? undefined;
     const buildPath = (path: string) =>
-        buildFilePath
-            ? buildFilePath(root, token, path, environment)
-            : path;
+        buildFilePath ? buildFilePath(root, token, path, environment) : path;
 
     const methods = getFileMethods(buildLink, buildPath);
     const t: Transformer = async (prev, method, payload, signal) => {
