@@ -18,9 +18,9 @@
     "scripts": {
         "prepare": "npm run build",
         "build": "deno2node tsconfig.json",
-        "cache": "deno cache src/mod.ts",
-        "lint": "deno lint --config deno.json",
-        "fmt": "deno fmt --config deno.json"
+        "cache": "deno cache --allow-import src/mod.ts",
+        "lint": "deno lint",
+        "fmt": "deno fmt"
     },
     "peerDependencies": {
         "grammy": "^1.3.0"
