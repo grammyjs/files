@@ -9,14 +9,15 @@ export type { File } from "@grammyjs/grammy/types";
 // Determine whether a file path is absolute
 export { isAbsolute as isAbsolutePath } from "node:path";
 
-let id = 0, tempDir: string;
+let id = 0, tempDir: string, fs: typeof import("node:fs");
 export async function createTempFile() {
     if ("Deno" in globalThis) {
         tempDir ??= await Deno.makeTempDir({ prefix: "grammY" });
     } else {
-        const os = process.getBuiltinModule("os");
-        const fs = process.getBuiltinModule("fs/promises");
-        tempDir ??= await fs.mkdtemp(`${os.tmpdir()}/grammY`);
+        fs ??= process.getBuiltinModule("fs");
+        tempDir ??= await fs.promises.mkdtemp(
+            `${process.getBuiltinModule("os").tmpdir()}/grammY`,
+        );
     }
     return `${tempDir}/${id++}`;
 }
@@ -31,7 +32,7 @@ export async function* readFile(path: string): AsyncIterable<Uint8Array> {
         const file = await Deno.open(path);
         yield* file.readable;
     } else {
-        const fs = process.getBuiltinModule("fs");
+        fs ??= process.getBuiltinModule("fs");
         yield* fs.createReadStream(path);
     }
 }
@@ -39,8 +40,8 @@ export async function copyFile(src: string, dest: string) {
     if ("Deno" in globalThis) {
         await Deno.copyFile(src, dest);
     } else {
-        const fs = process.getBuiltinModule("fs/promises");
-        await fs.copyFile(src, dest);
+        fs ??= process.getBuiltinModule("fs");
+        await fs.promises.copyFile(src, dest);
     }
 }
 // Copy a file from a URL to a file path
@@ -49,7 +50,7 @@ export async function downloadFile(url: string, dest: string) {
     if ("Deno" in globalThis) {
         await Deno.writeFile(dest, body);
     } else {
-        const fs = process.getBuiltinModule("fs/promises");
-        await fs.writeFile(dest, body);
+        fs ??= process.getBuiltinModule("fs");
+        await fs.promises.writeFile(dest, body);
     }
 }
