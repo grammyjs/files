@@ -1,5 +1,16 @@
 {
     "lock": false,
+    "license": "MIT",
+    "name": "@grammyjs/files",
+    "exports": "./src/mod.ts",
+    "imports": {
+        "@grammyjs/grammy": "jsr:@grammyjs/grammy@^2.0.0-beta.8"
+    },
+    "lint": {
+        "rules": {
+            "include": ["no-top-level-await"]
+        }
+    },
     "exclude": [
         "./node_modules/",
         "./out/",
